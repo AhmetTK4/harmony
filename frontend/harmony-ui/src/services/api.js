@@ -1,46 +1,4 @@
-// API taban URL'ini environment'a göre belirler
-const getApiBaseUrl = () => {
-  // Öncelik: Environment variable
-  if (process.env.REACT_APP_API_URL) {
-    return process.env.REACT_APP_API_URL;
-  }
-  // Development ortamı (npm start veya local docker)
-  if (process.env.REACT_APP_ENVIRONMENT === 'development' || process.env.NODE_ENV === 'development') {
-    return 'http://localhost:8081/api';
-  }
-  // Production ortamı (Google Cloud Run)
-  if (process.env.REACT_APP_ENVIRONMENT === 'production') {
-    return 'https://user-service-71511467925.europe-west1.run.app/api';
-  }
-  // Fallback: local
-  return 'http://localhost:8081/api';
-};
-
-// Her mikroservis için ayrı base URL'ler
-const getServiceBaseUrl = (service) => {
-  const isDevelopment = process.env.REACT_APP_ENVIRONMENT === 'development' || process.env.NODE_ENV === 'development';
-  
-  if (isDevelopment) {
-    const ports = {
-      user: '8081',
-      product: '8083',
-      order: '8082',
-      notification: '8084'
-    };
-    return `http://localhost:${ports[service]}/api`;
-  } else {
-    // Production URLs
-    const urls = {
-      user: 'https://user-service-71511467925.europe-west1.run.app/api',
-      product: 'https://product-service-71511467925.europe-west1.run.app/api',
-      order: 'https://order-service-71511467925.europe-west1.run.app/api',
-      notification: 'https://notification-service-71511467925.europe-west1.run.app/api'
-    };
-    return urls[service];
-  }
-};
-
-const API_BASE_URL = getApiBaseUrl();
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081/api';
 
 class ApiService {
   getAuthHeaders() {
@@ -122,7 +80,7 @@ class ApiService {
 
   // Product Service Methods
   async getProducts() {
-    const response = await fetch(`${getServiceBaseUrl('product')}/products`, {
+    const response = await fetch(`${API_BASE_URL}/products`, {
       headers: this.getAuthHeaders(),
     });
 
@@ -134,7 +92,7 @@ class ApiService {
   }
 
   async getProductById(id) {
-    const response = await fetch(`${getServiceBaseUrl('product')}/products/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
       headers: this.getAuthHeaders(),
     });
 
@@ -146,7 +104,7 @@ class ApiService {
   }
 
   async createProduct(productData) {
-    const response = await fetch(`${getServiceBaseUrl('product')}/products`, {
+    const response = await fetch(`${API_BASE_URL}/products`, {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(productData),
@@ -160,7 +118,7 @@ class ApiService {
   }
 
   async updateProduct(id, productData) {
-    const response = await fetch(`${getServiceBaseUrl('product')}/products/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
       method: 'PUT',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(productData),
@@ -174,7 +132,7 @@ class ApiService {
   }
 
   async deleteProduct(id) {
-    const response = await fetch(`${getServiceBaseUrl('product')}/products/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
       method: 'DELETE',
       headers: this.getAuthHeaders(),
     });
@@ -188,7 +146,7 @@ class ApiService {
 
   // Order Service Methods
   async getOrders() {
-    const response = await fetch(`${getServiceBaseUrl('order')}/orders`, {
+    const response = await fetch(`${API_BASE_URL}/orders`, {
       headers: this.getAuthHeaders(),
     });
 
@@ -200,7 +158,7 @@ class ApiService {
   }
 
   async getOrderById(id) {
-    const response = await fetch(`${getServiceBaseUrl('order')}/orders/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
       headers: this.getAuthHeaders(),
     });
 
@@ -212,7 +170,7 @@ class ApiService {
   }
 
   async createOrder(orderData) {
-    const response = await fetch(`${getServiceBaseUrl('order')}/orders`, {
+    const response = await fetch(`${API_BASE_URL}/orders`, {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(orderData),
@@ -226,7 +184,7 @@ class ApiService {
   }
 
   async updateOrder(id, orderData) {
-    const response = await fetch(`${getServiceBaseUrl('order')}/orders/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
       method: 'PUT',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(orderData),
@@ -240,7 +198,7 @@ class ApiService {
   }
 
   async deleteOrder(id) {
-    const response = await fetch(`${getServiceBaseUrl('order')}/orders/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
       method: 'DELETE',
       headers: this.getAuthHeaders(),
     });
@@ -253,7 +211,7 @@ class ApiService {
   }
 
   async getUserOrders(userId) {
-    const response = await fetch(`${getServiceBaseUrl('order')}/orders/user/${userId}`, {
+    const response = await fetch(`${API_BASE_URL}/orders/user/${userId}`, {
       headers: this.getAuthHeaders(),
     });
 
@@ -266,7 +224,7 @@ class ApiService {
 
   // Notification Service Methods
   async getNotifications() {
-    const response = await fetch(`${getServiceBaseUrl('notification')}/notifications`, {
+    const response = await fetch(`${API_BASE_URL}/notifications`, {
       headers: this.getAuthHeaders(),
     });
 
@@ -278,7 +236,7 @@ class ApiService {
   }
 
   async getNotificationById(id) {
-    const response = await fetch(`${getServiceBaseUrl('notification')}/notifications/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/notifications/${id}`, {
       headers: this.getAuthHeaders(),
     });
 
@@ -290,7 +248,7 @@ class ApiService {
   }
 
   async createNotification(notificationData) {
-    const response = await fetch(`${getServiceBaseUrl('notification')}/notifications`, {
+    const response = await fetch(`${API_BASE_URL}/notifications`, {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(notificationData),
@@ -304,7 +262,7 @@ class ApiService {
   }
 
   async updateNotification(id, notificationData) {
-    const response = await fetch(`${getServiceBaseUrl('notification')}/notifications/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/notifications/${id}`, {
       method: 'PUT',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(notificationData),
@@ -318,7 +276,7 @@ class ApiService {
   }
 
   async deleteNotification(id) {
-    const response = await fetch(`${getServiceBaseUrl('notification')}/notifications/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/notifications/${id}`, {
       method: 'DELETE',
       headers: this.getAuthHeaders(),
     });
@@ -331,7 +289,7 @@ class ApiService {
   }
 
   async getUserNotifications(userId) {
-    const response = await fetch(`${getServiceBaseUrl('notification')}/notifications/user/${userId}`, {
+    const response = await fetch(`${API_BASE_URL}/notifications/user/${userId}`, {
       headers: this.getAuthHeaders(),
     });
 
@@ -343,7 +301,7 @@ class ApiService {
   }
 
   async markNotificationAsRead(id) {
-    const response = await fetch(`${getServiceBaseUrl('notification')}/notifications/${id}/read`, {
+    const response = await fetch(`${API_BASE_URL}/notifications/${id}/read`, {
       method: 'PUT',
       headers: this.getAuthHeaders(),
     });
@@ -357,22 +315,22 @@ class ApiService {
 
   // Health Check Methods
   async healthCheck() {
-    const response = await fetch(`${getServiceBaseUrl('user')}/users/actuator/health`);
+    const response = await fetch(`${API_BASE_URL}/users/actuator/health`);
     return response.json();
   }
 
   async productHealthCheck() {
-    const response = await fetch(`${getServiceBaseUrl('product')}/products/actuator/health`);
+    const response = await fetch(`${API_BASE_URL}/products/actuator/health`);
     return response.json();
   }
 
   async orderHealthCheck() {
-    const response = await fetch(`${getServiceBaseUrl('order')}/orders/actuator/health`);
+    const response = await fetch(`${API_BASE_URL}/orders/actuator/health`);
     return response.json();
   }
 
   async notificationHealthCheck() {
-    const response = await fetch(`${getServiceBaseUrl('notification')}/notifications/actuator/health`);
+    const response = await fetch(`${API_BASE_URL}/notifications/actuator/health`);
     return response.json();
   }
 
