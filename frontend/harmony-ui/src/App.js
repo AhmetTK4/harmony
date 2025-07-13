@@ -7,6 +7,7 @@ import Home from './pages/Home.js';
 import Users from './pages/Users.js';
 import Products from './pages/Products.js';
 import Orders from './pages/Orders.js';
+import Notifications from './pages/Notifications.js';
 import Login from './pages/Login.js';
 import Register from './pages/Register.js';
 import './App.css';
@@ -26,6 +27,7 @@ function App() {
                 <Route path="/users" element={<Users />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/orders" element={<Orders />} />
+                <Route path="/notifications" element={<Notifications />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
               </Routes>

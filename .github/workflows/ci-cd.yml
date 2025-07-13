@@ -10,6 +10,10 @@ env:
   PROJECT_ID: tactile-cinema-465809-f9
   REGION: europe-west1
   USER_SERVICE_NAME: user-service
+  PRODUCT_SERVICE_NAME: product-service
+  ORDER_SERVICE_NAME: order-service
+  NOTIFICATION_SERVICE_NAME: notification-service
+  API_GATEWAY_NAME: api-gateway
   FRONTEND_SERVICE_NAME: harmony-ui
 
 jobs:
@@ -41,6 +45,21 @@ jobs:
       run: |
         cd backend/product-service
         mvn clean test
+    
+    - name: Test Order Service
+      run: |
+        cd backend/order-service
+        mvn clean test
+    
+    - name: Test Notification Service
+      run: |
+        cd backend/notification-service
+        mvn clean test
+    
+    - name: Test API Gateway
+      run: |
+        cd backend/api-gateway
+        mvn clean test
 
   build-backend:
     needs: test-backend
@@ -65,6 +84,21 @@ jobs:
         cd backend/product-service
         mvn clean package -DskipTests
     
+    - name: Build Order Service
+      run: |
+        cd backend/order-service
+        mvn clean package -DskipTests
+    
+    - name: Build Notification Service
+      run: |
+        cd backend/notification-service
+        mvn clean package -DskipTests
+    
+    - name: Build API Gateway
+      run: |
+        cd backend/api-gateway
+        mvn clean package -DskipTests
+    
     - name: Upload User Service Artifact
       uses: actions/upload-artifact@v4
       with:
@@ -76,6 +110,24 @@ jobs:
       with:
         name: product-service-jar
         path: backend/product-service/target/*.jar
+    
+    - name: Upload Order Service Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: order-service-jar
+        path: backend/order-service/target/*.jar
+    
+    - name: Upload Notification Service Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: notification-service-jar
+        path: backend/notification-service/target/*.jar
+    
+    - name: Upload API Gateway Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: api-gateway-jar
+        path: backend/api-gateway/target/*.jar
 
   build-frontend:
     runs-on: ubuntu-latest
@@ -121,6 +173,30 @@ jobs:
         name: user-service-jar
         path: backend/user-service/target/
     
+    - name: Download Product Service Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: product-service-jar
+        path: backend/product-service/target/
+    
+    - name: Download Order Service Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: order-service-jar
+        path: backend/order-service/target/
+    
+    - name: Download Notification Service Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: notification-service-jar
+        path: backend/notification-service/target/
+    
+    - name: Download API Gateway Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: api-gateway-jar
+        path: backend/api-gateway/target/
+    
     - name: Download Frontend Artifacts
       uses: actions/download-artifact@v4
       with:
@@ -145,6 +221,30 @@ jobs:
         docker build -t europe-west1-docker.pkg.dev/tactile-cinema-465809-f9/harmony-repo/user-service:${{ github.sha }} .
         docker push europe-west1-docker.pkg.dev/tactile-cinema-465809-f9/harmony-repo/user-service:${{ github.sha }}
     
+    - name: Build and Push Product Service Image
+      run: |
+        cd backend/product-service
+        docker build -t europe-west1-docker.pkg.dev/tactile-cinema-465809-f9/harmony-repo/product-service:${{ github.sha }} .
+        docker push europe-west1-docker.pkg.dev/tactile-cinema-465809-f9/harmony-repo/product-service:${{ github.sha }}
+    
+    - name: Build and Push Order Service Image
+      run: |
+        cd backend/order-service
+        docker build -t europe-west1-docker.pkg.dev/tactile-cinema-465809-f9/harmony-repo/order-service:${{ github.sha }} .
+        docker push europe-west1-docker.pkg.dev/tactile-cinema-465809-f9/harmony-repo/order-service:${{ github.sha }}
+    
+    - name: Build and Push Notification Service Image
+      run: |
+        cd backend/notification-service
+        docker build -t europe-west1-docker.pkg.dev/tactile-cinema-465809-f9/harmony-repo/notification-service:${{ github.sha }} .
+        docker push europe-west1-docker.pkg.dev/tactile-cinema-465809-f9/harmony-repo/notification-service:${{ github.sha }}
+    
+    - name: Build and Push API Gateway Image
+      run: |
+        cd backend/api-gateway
+        docker build -t europe-west1-docker.pkg.dev/tactile-cinema-465809-f9/harmony-repo/api-gateway:${{ github.sha }} .
+        docker push europe-west1-docker.pkg.dev/tactile-cinema-465809-f9/harmony-repo/api-gateway:${{ github.sha }}
+    
     - name: Build and Push Frontend Image
       run: |
         cd frontend/harmony-ui
@@ -165,6 +265,54 @@ jobs:
           --max-instances 10 \
           --set-env-vars="SPRING_PROFILES_ACTIVE=prod,MONGODB_URI=${{ secrets.MONGODB_URI }},JWT_SECRET=${{ secrets.JWT_SECRET }}"
         
+        # Deploy Product Service
+        gcloud run deploy ${{ env.PRODUCT_SERVICE_NAME }} \
+          --image europe-west1-docker.pkg.dev/tactile-cinema-465809-f9/harmony-repo/product-service:${{ github.sha }} \
+          --platform managed \
+          --region ${{ env.REGION }} \
+          --allow-unauthenticated \
+          --memory 1Gi \
+          --cpu 1 \
+          --timeout 300 \
+          --max-instances 10 \
+          --set-env-vars="SPRING_PROFILES_ACTIVE=prod,MONGODB_URI=${{ secrets.MONGODB_URI }}"
+        
+        # Deploy Order Service
+        gcloud run deploy ${{ env.ORDER_SERVICE_NAME }} \
+          --image europe-west1-docker.pkg.dev/tactile-cinema-465809-f9/harmony-repo/order-service:${{ github.sha }} \
+          --platform managed \
+          --region ${{ env.REGION }} \
+          --allow-unauthenticated \
+          --memory 1Gi \
+          --cpu 1 \
+          --timeout 300 \
+          --max-instances 10 \
+          --set-env-vars="SPRING_PROFILES_ACTIVE=prod,MONGODB_URI=${{ secrets.MONGODB_URI }}"
+        
+        # Deploy Notification Service
+        gcloud run deploy ${{ env.NOTIFICATION_SERVICE_NAME }} \
+          --image europe-west1-docker.pkg.dev/tactile-cinema-465809-f9/harmony-repo/notification-service:${{ github.sha }} \
+          --platform managed \
+          --region ${{ env.REGION }} \
+          --allow-unauthenticated \
+          --memory 1Gi \
+          --cpu 1 \
+          --timeout 300 \
+          --max-instances 10 \
+          --set-env-vars="SPRING_PROFILES_ACTIVE=prod,MONGODB_URI=${{ secrets.MONGODB_URI }}"
+        
+        # Deploy API Gateway
+        gcloud run deploy ${{ env.API_GATEWAY_NAME }} \
+          --image europe-west1-docker.pkg.dev/tactile-cinema-465809-f9/harmony-repo/api-gateway:${{ github.sha }} \
+          --platform managed \
+          --region ${{ env.REGION }} \
+          --allow-unauthenticated \
+          --memory 1Gi \
+          --cpu 1 \
+          --timeout 300 \
+          --max-instances 10 \
+          --set-env-vars="SPRING_PROFILES_ACTIVE=prod"
+        
         # Deploy Frontend
         gcloud run deploy ${{ env.FRONTEND_SERVICE_NAME }} \
           --image europe-west1-docker.pkg.dev/tactile-cinema-465809-f9/harmony-repo/harmony-ui:${{ github.sha }} \
@@ -180,6 +328,14 @@ jobs:
     - name: Update Cloud Run URLs
       run: |
         USER_SERVICE_URL=$(gcloud run services describe ${{ env.USER_SERVICE_NAME }} --region=${{ env.REGION }} --format='value(status.url)')
+        PRODUCT_SERVICE_URL=$(gcloud run services describe ${{ env.PRODUCT_SERVICE_NAME }} --region=${{ env.REGION }} --format='value(status.url)')
+        ORDER_SERVICE_URL=$(gcloud run services describe ${{ env.ORDER_SERVICE_NAME }} --region=${{ env.REGION }} --format='value(status.url)')
+        NOTIFICATION_SERVICE_URL=$(gcloud run services describe ${{ env.NOTIFICATION_SERVICE_NAME }} --region=${{ env.REGION }} --format='value(status.url)')
+        API_GATEWAY_URL=$(gcloud run services describe ${{ env.API_GATEWAY_NAME }} --region=${{ env.REGION }} --format='value(status.url)')
         FRONTEND_URL=$(gcloud run services describe ${{ env.FRONTEND_SERVICE_NAME }} --region=${{ env.REGION }} --format='value(status.url)')
         echo "User Service URL: $USER_SERVICE_URL"
+        echo "Product Service URL: $PRODUCT_SERVICE_URL"
+        echo "Order Service URL: $ORDER_SERVICE_URL"
+        echo "Notification Service URL: $NOTIFICATION_SERVICE_URL"
+        echo "API Gateway URL: $API_GATEWAY_URL"
         echo "Frontend URL: $FRONTEND_URL" 

@@ -32,6 +32,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "CI=false GENERATE_SOURCEMAP=false react-scripts build",
+    "build:dev": "CI=false GENERATE_SOURCEMAP=false REACT_APP_ENVIRONMENT=development react-scripts build",
+    "build:prod": "CI=false GENERATE_SOURCEMAP=false REACT_APP_ENVIRONMENT=production react-scripts build",
     "test": "react-scripts test",
     "test:ci": "react-scripts test --watchAll=false --coverage",
     "eject": "react-scripts eject",

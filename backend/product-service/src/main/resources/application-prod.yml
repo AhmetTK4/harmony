@@ -1,0 +1,43 @@
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/harmony_products}
+      auto-index-creation: false
+      connect-timeout: 180000
+      socket-timeout: 180000
+      server-selection-timeout: 180000
+      max-wait-time: 180000
+      max-connection-pool-size: 5
+      min-connection-pool-size: 1
+      max-connection-idle-time: 60000
+
+server:
+  port: 8080
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+  health:
+    mongo:
+      enabled: true
+
+logging:
+  level:
+    com.harmony: INFO
+    org.springframework.data.mongodb: INFO
+    org.springframework.boot: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true 

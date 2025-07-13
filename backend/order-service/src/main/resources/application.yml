@@ -3,11 +3,11 @@ server:
 
 spring:
   application:
-    name: user-service
+    name: order-service
   
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/harmony_users}
+      uri: ${MONGODB_URI:mongodb://localhost:27017/harmony_orders}
       auto-index-creation: true
   
   cloud:
@@ -40,8 +40,7 @@ management:
 
 logging:
   level:
-    com.harmony.userservice: DEBUG
-    org.springframework.security: DEBUG
+    com.harmony.orderservice: DEBUG
     org.springframework.data.mongodb: DEBUG
     com.mongodb: DEBUG
   pattern:
