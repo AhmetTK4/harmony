@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext.js';
-import { apiService, User } from '../services/api.js';
+import { apiService } from '../services/api.js';
 
-const Users= () => {
-  const [users, setUsers] = useState<User[]>([]);
+const Users = () => {
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { isAuthenticated, logout } = useAuth();
