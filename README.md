@@ -1,125 +1,221 @@
-# Harmony - Modern Mikroservis Mimarisi
+# Harmony Microservices Platform
 
-Harmony, modern teknolojiler kullanarak geliştirilmiş kapsamlı bir mikroservis projesidir.
+A modern microservices platform built with Spring Boot, React, and MongoDB, deployed on Google Cloud Platform.
 
-## 🏗️ Mimari
+## 🏗️ Architecture
 
-### Backend Mikroservisler
-- **User Service** - Kullanıcı yönetimi ve kimlik doğrulama
-- **Product Service** - Ürün katalog yönetimi
-- **Order Service** - Sipariş işlemleri
-- **Notification Service** - Bildirim yönetimi
-- **API Gateway** - Merkezi API yönetimi
+- **Backend**: Spring Boot 3.2.0 + Java 17
+- **Frontend**: React 18 + TypeScript + Tailwind CSS
+- **Database**: MongoDB
+- **Authentication**: JWT
+- **Deployment**: Google Cloud Run
+- **CI/CD**: GitHub Actions
 
-### Frontend
-- **Harmony UI** - React tabanlı modern web uygulaması
+## 🚀 Quick Start
 
-### Infrastructure
-- **MongoDB** - Ana veritabanı
-- **RabbitMQ** - Mesaj kuyruğu
-- **Elasticsearch** - Arama ve log analizi
-- **Redis** - Önbellek
+### Prerequisites
 
-## 🛠️ Teknolojiler
-
-### Backend
-- Java 17
-- Spring Boot 3+
-- Spring Cloud
-- Spring Security
-- Spring Data MongoDB
-- Spring AMQP (RabbitMQ)
-
-### Frontend
-- React 18
-- TypeScript
-- Vite
-- Tailwind CSS
-- React Query
-
-### DevOps & Cloud
-- Docker & Docker Compose
-- Kubernetes
-- Google Cloud Platform
-- GitHub Actions (CI/CD)
-- Terraform
-
-## 🚀 Hızlı Başlangıç
-
-### Gereksinimler
 - Java 17+
 - Node.js 18+
-- Docker & Docker Compose
-- Maven
+- Docker
+- Google Cloud CLI
+- MongoDB (local or Atlas)
 
-### Yerel Geliştirme
+### Local Development
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/harmony.git
+   cd harmony
+   ```
+
+2. **Start MongoDB**
+   ```bash
+   docker run -d -p 27017:27017 --name mongodb mongo:latest
+   ```
+
+3. **Start Backend**
+   ```bash
+   cd backend/user-service
+   mvn spring-boot:run
+   ```
+
+4. **Start Frontend**
+   ```bash
+   cd frontend/harmony-ui
+   npm install
+   npm start
+   ```
+
+5. **Access the application**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:8081
+
+## ☁️ Google Cloud Deployment
+
+### 1. Setup Google Cloud Project
+
 ```bash
-# Repository'yi klonlayın
-git clone https://github.com/AhmetTK4/harmony.git
-cd harmony
+# Create new project
+gcloud projects create harmony-microservices
 
-# Backend servisleri başlatın
-cd backend
-./start-services.sh
+# Set project
+gcloud config set project harmony-microservices
 
-# Frontend'i başlatın
-cd frontend/harmony-ui
-npm install
-npm run dev
+# Enable required APIs
+gcloud services enable cloudbuild.googleapis.com
+gcloud services enable run.googleapis.com
+gcloud services enable containerregistry.googleapis.com
 ```
 
-## 📁 Proje Yapısı
+### 2. Create Service Account
+
+```bash
+# Create service account
+gcloud iam service-accounts create harmony-deployer \
+  --display-name="Harmony Deployer"
+
+# Grant necessary permissions
+gcloud projects add-iam-policy-binding harmony-microservices \
+  --member="serviceAccount:harmony-deployer@harmony-microservices.iam.gserviceaccount.com" \
+  --role="roles/run.admin"
+
+gcloud projects add-iam-policy-binding harmony-microservices \
+  --member="serviceAccount:harmony-deployer@harmony-microservices.iam.gserviceaccount.com" \
+  --role="roles/storage.admin"
+
+# Create and download key
+gcloud iam service-accounts keys create ~/harmony-key.json \
+  --iam-account=harmony-deployer@harmony-microservices.iam.gserviceaccount.com
+```
+
+### 3. Setup GitHub Secrets
+
+Add these secrets to your GitHub repository:
+
+- `GCP_SA_KEY`: Content of `~/harmony-key.json`
+- `MONGODB_URI`: Your MongoDB connection string
+- `JWT_SECRET`: A secure random string for JWT signing
+- `REACT_APP_API_URL`: Will be set automatically by CI/CD
+
+### 4. Deploy
+
+#### Option A: Manual Deployment
+```bash
+./deploy.sh
+```
+
+#### Option B: Automated CI/CD
+Push to `main` branch and GitHub Actions will automatically deploy.
+
+## 📁 Project Structure
 
 ```
 harmony/
 ├── backend/
-│   ├── user-service/          # Kullanıcı yönetimi
-│   ├── product-service/       # Ürün yönetimi  
-│   ├── order-service/         # Sipariş yönetimi
-│   ├── notification-service/  # Bildirim servisi
-│   └── api-gateway/          # API Gateway
+│   ├── user-service/          # User management microservice
+│   └── product-service/       # Product management microservice
 ├── frontend/
-│   └── harmony-ui/           # React uygulaması
-├── infrastructure/
-│   ├── docker/               # Docker compose dosyaları
-│   ├── kubernetes/           # K8s manifest dosyaları
-│   └── terraform/            # GCP infrastructure
-├── ci-cd/
-│   └── .github/workflows/    # GitHub Actions
-├── shared/
-│   └── common-lib/           # Ortak kütüphaneler
-└── docs/                     # Proje dokümantasyonu
+│   └── harmony-ui/           # React frontend application
+├── .github/
+│   └── workflows/
+│       └── ci-cd.yml         # GitHub Actions CI/CD pipeline
+├── deploy.sh                 # Manual deployment script
+└── README.md
 ```
 
-## 🔧 Geliştirme
+## 🔧 Configuration
 
-### Backend Geliştirme
-Her mikroservis Spring Boot 3+ ile geliştirilmiştir ve kendi Maven projesi olarak yapılandırılmıştır.
+### Environment Variables
 
-### Frontend Geliştirme
-React uygulaması modern web standartlarına uygun olarak geliştirilmiştir.
+#### Backend (User Service)
+- `MONGODB_URI`: MongoDB connection string
+- `JWT_SECRET`: JWT signing secret
+- `SPRING_PROFILES_ACTIVE`: Active profile (dev/prod)
 
-## 🚀 Deployment
+#### Frontend
+- `REACT_APP_API_URL`: Backend API URL
+- `REACT_APP_ENVIRONMENT`: Environment (development/production)
 
-### Google Cloud Platform
-Proje Google Cloud Platform'da Kubernetes ile deploy edilir.
+### Production Settings
 
-### CI/CD Pipeline
-GitHub Actions ile otomatik build, test ve deployment süreçleri yapılandırılmıştır.
+The application uses different configurations for production:
 
-## 📝 Lisans
+- **Backend**: `application-prod.yml`
+- **Frontend**: `env.production`
+- **Docker**: Multi-stage builds for optimization
 
-Bu proje MIT lisansı altında lisanslanmıştır.
+## 🔐 Security
 
-## 👥 Katkıda Bulunma
+- JWT-based authentication
+- CORS configured for production
+- Environment variables for sensitive data
+- HTTPS enforced in production
 
-1. Fork edin
-2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
-3. Commit edin (`git commit -m 'Add some amazing feature'`)
-4. Push edin (`git push origin feature/amazing-feature`)
-5. Pull Request oluşturun
+## 📊 Monitoring
 
-## 📞 İletişim
+- Health check endpoints: `/actuator/health`
+- Metrics: `/actuator/metrics`
+- Application info: `/actuator/info`
 
-Proje Sahibi: Ahmet Temel Kundupoğlu
-GitHub: [@AhmetTK4](https://github.com/AhmetTK4)
+## 🧪 Testing
+
+```bash
+# Backend tests
+cd backend/user-service
+mvn test
+
+# Frontend tests
+cd frontend/harmony-ui
+npm test
+```
+
+## 🔄 CI/CD Pipeline
+
+The GitHub Actions pipeline includes:
+
+1. **Test**: Run unit tests for backend and frontend
+2. **Build**: Create production builds
+3. **Deploy**: Deploy to Google Cloud Run
+4. **Notify**: Report deployment status
+
+## 📈 Scaling
+
+- **Google Cloud Run**: Auto-scales based on traffic
+- **MongoDB Atlas**: Managed database with auto-scaling
+- **Load Balancing**: Cloud Run handles traffic distribution
+
+## 🛠️ Development
+
+### Adding New Services
+
+1. Create new Spring Boot service in `backend/`
+2. Add to CI/CD pipeline
+3. Update deployment script
+4. Add service discovery configuration
+
+### Frontend Development
+
+```bash
+cd frontend/harmony-ui
+npm install
+npm start
+```
+
+### Backend Development
+
+```bash
+cd backend/user-service
+mvn spring-boot:run
+```
+
+## 📞 Support
+
+For issues and questions:
+- Create an issue on GitHub
+- Check the documentation
+- Review the logs in Google Cloud Console
+
+## 📄 License
+
+This project is licensed under the MIT License.

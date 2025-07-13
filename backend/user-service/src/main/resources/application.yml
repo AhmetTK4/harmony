@@ -11,22 +11,27 @@ spring:
       port: 27017
       database: harmony_users
       auto-index-creation: true
+      # MongoDB authentication'ı geçici olarak devre dışı
+      # username: admin
+      # password: harmony123
+      # authentication-database: admin
   
   cloud:
     discovery:
-      enabled: true
+      enabled: false
     config:
       enabled: false
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-    register-with-eureka: true
-    fetch-registry: true
-  instance:
-    prefer-ip-address: true
-    instance-id: ${spring.application.name}:${server.port}
+# Eureka'yı geçici olarak devre dışı bırak
+# eureka:
+#   client:
+#     service-url:
+#       defaultZone: http://localhost:8761/eureka/
+#     register-with-eureka: true
+#     fetch-registry: true
+#   instance:
+#     prefer-ip-address: true
+#     instance-id: ${spring.application.name}:${server.port}
 
 management:
   endpoints:
