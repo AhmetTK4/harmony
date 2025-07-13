@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Orders: React.FC = () => {
+const Orders= () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="py-8">

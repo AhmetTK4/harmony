@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { apiService } from '../services/api';
+import { useAuth } from '../contexts/AuthContext.js';
+import { apiService } from '../services/api.js';
 
-const Home: React.FC = () => {
+const Home = () => {
   const { isAuthenticated, user } = useAuth();
-  const [healthStatus, setHealthStatus] = useState<string>('');
+  const [healthStatus, setHealthStatus] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

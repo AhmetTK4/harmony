@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { apiService, User } from '../services/api';
+import { useAuth } from '../contexts/AuthContext.js';
+import { apiService, User } from '../services/api.js';
 
-const Users: React.FC = () => {
+const Users= () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

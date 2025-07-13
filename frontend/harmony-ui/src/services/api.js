@@ -1,39 +1,7 @@
 const API_BASE_URL = 'http://localhost:8081/api';
 
-export interface UserRegistrationData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  phoneNumber: string;
-  address: string;
-}
-
-export interface LoginData {
-  email: string;
-  password: string;
-}
-
-export interface LoginResponse {
-  token: string;
-}
-
-export interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
-  address: string;
-  roles: string[];
-  enabled: boolean;
-  createdAt: string;
-  updatedAt: string;
-  fullName: string;
-}
-
 class ApiService {
-  private getAuthHeaders(): HeadersInit {
+  getAuthHeaders() {
     const token = localStorage.getItem('jwt_token');
     return {
       'Content-Type': 'application/json',
@@ -41,7 +9,7 @@ class ApiService {
     };
   }
 
-  async register(userData: UserRegistrationData): Promise<User> {
+  async register(userData) {
     const response = await fetch(`${API_BASE_URL}/users/register`, {
       method: 'POST',
       headers: {
@@ -57,7 +25,7 @@ class ApiService {
     return response.json();
   }
 
-  async login(loginData: LoginData): Promise<LoginResponse> {
+  async login(loginData) {
     const response = await fetch(`${API_BASE_URL}/users/login`, {
       method: 'POST',
       headers: {
@@ -73,7 +41,7 @@ class ApiService {
     return response.json();
   }
 
-  async getUsers(): Promise<User[]> {
+  async getUsers() {
     const response = await fetch(`${API_BASE_URL}/users`, {
       headers: this.getAuthHeaders(),
     });
@@ -85,7 +53,7 @@ class ApiService {
     return response.json();
   }
 
-  async getUserById(id: string): Promise<User> {
+  async getUserById(id) {
     const response = await fetch(`${API_BASE_URL}/users/${id}`, {
       headers: this.getAuthHeaders(),
     });
@@ -97,7 +65,7 @@ class ApiService {
     return response.json();
   }
 
-  async healthCheck(): Promise<string> {
+  async healthCheck() {
     const response = await fetch(`${API_BASE_URL}/users/health`);
     
     if (!response.ok) {
@@ -107,19 +75,19 @@ class ApiService {
     return response.text();
   }
 
-  isAuthenticated(): boolean {
+  isAuthenticated() {
     return !!localStorage.getItem('jwt_token');
   }
 
-  logout(): void {
+  logout() {
     localStorage.removeItem('jwt_token');
   }
 
-  getToken(): string | null {
+  getToken() {
     return localStorage.getItem('jwt_token');
   }
 
-  setToken(token: string): void {
+  setToken(token) {
     localStorage.setItem('jwt_token', token);
   }
 }

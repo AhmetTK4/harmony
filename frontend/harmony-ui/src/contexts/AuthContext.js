@@ -1,16 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { apiService, LoginData, UserRegistrationData, User } from '../services/api';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { apiService } from '../services/api.js';
 
-interface AuthContextType {
-  isAuthenticated: boolean;
-  user: User | null;
-  login: (loginData: LoginData) => Promise<void>;
-  register: (userData: UserRegistrationData) => Promise<void>;
-  logout: () => void;
-  loading: boolean;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -20,13 +11,9 @@ export const useAuth = () => {
   return context;
 };
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,7 +25,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (loginData: LoginData) => {
+  const login = async (loginData) => {
     try {
       const response = await apiService.login(loginData);
       apiService.setToken(response.token);
@@ -55,7 +42,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const register = async (userData: UserRegistrationData) => {
+  const register = async (userData) => {
     try {
       const newUser = await apiService.register(userData);
       setUser(newUser);
@@ -72,7 +59,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
   };
 
-  const value: AuthContextType = {
+  const value = {
     isAuthenticated,
     user,
     login,
