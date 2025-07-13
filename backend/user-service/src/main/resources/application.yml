@@ -1,15 +1,14 @@
 server:
-  port: 8080
+  port: 8081
 
 spring:
   application:
     name: user-service
-  
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/harmony_users}
-      auto-index-creation: true
-  
+      uri: ${
+        MONGODB_URI:mongodb://localhost:27017/user
+      }
   cloud:
     discovery:
       enabled: true
@@ -24,25 +23,19 @@ eureka:
     fetch-registry: true
   instance:
     prefer-ip-address: true
-    instance-id: ${spring.application.name}:${server.port}
+    instance-id: ${spring.application.name}:8081
 
 management:
   endpoints:
-    web:
-      exposure:
-        include: health,info,metrics
+    web.exposure.include: "*"
   endpoint:
     health:
       show-details: always
-  health:
-    mongo:
-      enabled: true
 
 logging:
   level:
-    com.harmony.userservice: DEBUG
-    org.springframework.security: DEBUG
+    com.harmony: DEBUG
     org.springframework.data.mongodb: DEBUG
     com.mongodb: DEBUG
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n" 
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
