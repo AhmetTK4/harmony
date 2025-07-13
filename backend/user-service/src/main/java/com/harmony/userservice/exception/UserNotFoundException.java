@@ -1,5 +1,6 @@
 package com.harmony.userservice.exception;
 
+
 public class UserNotFoundException extends RuntimeException {
     
     public UserNotFoundException(String message) {
