@@ -11,7 +11,7 @@ A modern microservices platform built with Spring Boot, React, and MongoDB, depl
 - **Deployment**: Google Cloud Run
 - **CI/CD**: GitHub Actions
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 
