@@ -61,7 +61,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        // Development ve production için origin'ler
+        configuration.setAllowedOrigins(Arrays.asList(
+            "http://localhost:3000",                           // Development frontend
+            "http://localhost:3001",                           // Development frontend (alternatif port)
+            "https://harmony-ui-71511467925.europe-west1.run.app" // Production frontend (Google Cloud Run)
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

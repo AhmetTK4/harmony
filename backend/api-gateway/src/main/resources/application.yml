@@ -19,9 +19,11 @@ spring:
         cors-configurations:
           '[/**]':
             allowed-origins:
-              - "http://localhost:3000"
-              - "http://localhost:80"
-              - "http://localhost"
+              - "http://localhost:3000"                           # Development frontend
+              - "http://localhost:3001"                           # Development frontend (alternatif port)
+              - "http://localhost:80"                             # Development (nginx)
+              - "http://localhost"                                # Development
+              - "https://harmony-ui-71511467925.europe-west1.run.app" # Production frontend (Google Cloud Run)
             allowed-methods:
               - GET
               - POST

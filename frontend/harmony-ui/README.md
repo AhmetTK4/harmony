@@ -1,133 +1,124 @@
-# Harmony UI - Frontend Application
+# Harmony Frontend - Kullanım Kılavuzu
 
-Harmony mikroservis mimarisinin frontend uygulaması.
+## 🚀 Ortam Yapılandırması
 
-## 🚀 Hızlı Başlangıç
+Bu proje development ve production ortamları için farklı API URL'leri kullanır:
 
-### Development Ortamı
-
-```bash
-# Development için frontend'i başlat
-./deploy.sh dev
-
-# Frontend http://localhost:3000 adresinde erişilebilir
-```
-
-### Production Ortamı
-
-```bash
-# Production için frontend'i başlat
-./deploy.sh prod
-
-# Frontend http://localhost adresinde erişilebilir
-```
-
-## 🔧 Environment Konfigürasyonu
-
-### Development
+### Development Ortamı (Local)
 - **API URL**: `http://localhost:8080/api`
-- **Port**: 3000
-- **Environment**: development
+- **Frontend URL**: `http://localhost:3000`
+- **Kullanım**: Local microservices ile test
 
-### Production
+### Production Ortamı (Google Cloud)
 - **API URL**: `https://user-service-71511467925.europe-west1.run.app/api`
-- **Port**: 80
-- **Environment**: production
+- **Frontend URL**: `http://localhost:3000`
+- **Kullanım**: Google Cloud Run'daki servislerle
 
-## 📁 Dosya Yapısı
+## 🛠️ Kurulum ve Çalıştırma
 
-```
-harmony-ui/
-├── src/
-│   ├── services/
-│   │   └── api.js          # API servis konfigürasyonu
-│   ├── components/         # React bileşenleri
-│   ├── pages/             # Sayfa bileşenleri
-│   └── contexts/          # React context'leri
-├── env.development        # Development environment variables
-├── env.production         # Production environment variables
-├── deploy.sh              # Deployment script
-└── Dockerfile             # Docker konfigürasyonu
-```
-
-## 🔄 API Konfigürasyonu
-
-API servisi otomatik olarak environment'a göre doğru URL'i seçer:
-
-```javascript
-// Environment'a göre API URL'ini belirle
-const getApiBaseUrl = () => {
-  // Production'da environment variable kullan
-  if (process.env.REACT_APP_API_URL) {
-    return process.env.REACT_APP_API_URL;
-  }
-  
-  // Development'ta localhost kullan
-  if (process.env.NODE_ENV === 'development') {
-    return 'http://localhost:8080/api';
-  }
-  
-  // Fallback olarak production URL'i kullan
-  return 'https://user-service-71511467925.europe-west1.run.app/api';
-};
-```
-
-## 🐳 Docker Kullanımı
-
-### Build
-
+### Development Ortamı (Önerilen)
 ```bash
-# Development build
-docker build --build-arg REACT_APP_API_URL=http://localhost:8080/api --build-arg REACT_APP_ENVIRONMENT=development -t harmony-ui .
+# Docker ile tüm servisleri başlat
+cd infrastructure/docker
+docker compose up -d
 
-# Production build
-docker build --build-arg REACT_APP_API_URL=https://user-service-71511467925.europe-west1.run.app/api --build-arg REACT_APP_ENVIRONMENT=production -t harmony-ui .
+# Frontend otomatik olarak http://localhost:3000'de açılır
+# API Gateway http://localhost:8080'de çalışır
 ```
 
-### Run
-
+### Manuel Development
 ```bash
-# Development
-docker run -d --name harmony-ui -p 3000:8080 harmony-ui
-
-# Production
-docker run -d --name harmony-ui -p 80:8080 harmony-ui
+# Local development için
+cd frontend/harmony-ui
+cp env.development .env
+npm install
+npm start
 ```
 
-## 🧪 Test
+### Production Ortamı Test
+```bash
+# Production build test
+cd frontend/harmony-ui
+cp env.production .env
+npm install
+npm run build
+npx serve -s build -l 3000
+```
 
-Frontend'den register işlemini test etmek için:
+## 🔧 Test ve Debug
 
-1. http://localhost:3000 (development) veya http://localhost (production) adresine git
-2. Register sayfasına git
-3. Formu doldur ve kayıt ol
+### Development Ortamı Test
+```bash
+cd frontend/harmony-ui
+./debug-api.sh
+```
 
-## 🔍 Troubleshooting
+### Production Ortamı Test
+```bash
+cd frontend/harmony-ui
+./test-production.sh
+```
 
-### "Registration failed" Hatası
+## ✅ Sorun Çözümü
 
-1. Backend servislerinin çalıştığından emin ol:
-   ```bash
-   curl http://localhost:8080/actuator/health
-   ```
+**Problem**: Frontend production API URL'sine istek gönderiyordu
+**Çözüm**: 
+1. Frontend container'ı yeniden build edildi
+2. Environment variable'lar doğru şekilde set edildi
+3. Development ortamında localhost:8080/api kullanılıyor
+4. Production ortamında Google Cloud API kullanılıyor
 
-2. API Gateway'in çalıştığını kontrol et:
-   ```bash
-   curl http://localhost:8080/api/users/register -X POST -H "Content-Type: application/json" -d '{"username":"test","email":"test@test.com","password":"password","firstName":"Test","lastName":"User"}'
-   ```
+**Problem**: Mikroservislerin port mapping'leri yanlıştı
+**Çözüm**:
+1. Product Service: `8082:8080` (8082 dış port, 8080 iç port)
+2. User Service: `8081:8080` (8081 dış port, 8080 iç port)
+3. Order Service: `8083:8080` (8083 dış port, 8080 iç port)
+4. Notification Service: `8084:8080` (8084 dış port, 8080 iç port)
 
-3. Frontend'in doğru environment'da build edildiğini kontrol et:
-   ```bash
-   docker logs harmony-ui
-   ```
+## 📁 Environment Dosyaları
 
-### CORS Hatası
+- `env.development`: Development ortamı için (localhost:8080/api)
+- `env.production`: Production ortamı için (Google Cloud API)
 
-Frontend ve backend farklı portlarda çalışıyorsa CORS hatası alabilirsiniz. Bu durumda API Gateway'de CORS konfigürasyonu yapılması gerekebilir.
+## 🎯 Kullanım
 
-## 📝 Notlar
+1. **Development**: `docker compose up -d` ile tüm servisleri başlat
+2. **Frontend**: http://localhost:3000 adresine git
+3. **API**: http://localhost:8080/api üzerinden erişim
+4. **Eureka**: http://localhost:8761 ile servis durumunu kontrol et
 
-- Frontend React ile geliştirilmiştir
-- Tailwind CSS kullanılmaktadır
-- API Gateway üzerinden backend servislerine bağlanır
-- Environment variable'lar build sırasında inject edilir 
+## 🔍 Monitoring
+
+- **Frontend**: http://localhost:3000
+- **API Gateway**: http://localhost:8080
+- **Eureka Server**: http://localhost:8761
+- **MongoDB**: localhost:27017
+- **RabbitMQ**: http://localhost:15672 (admin/harmony123)
+- **Elasticsearch**: http://localhost:9200
+- **Kibana**: http://localhost:5601
+
+## 🚨 Önemli Notlar
+
+- Development ortamında frontend **sadece** local API'yi kullanır
+- Production ortamında frontend **sadece** Google Cloud API'yi kullanır
+- Environment dosyaları otomatik olarak doğru ortamı seçer
+- Kodda hardcoded URL yoktur, her şey environment variable'larla yönetilir
+- Tüm mikroservisler container içinde 8080 portunda çalışır
+- Dış portlar farklıdır (8081, 8082, 8083, 8084) ama API Gateway üzerinden erişim yapılır
+
+## 🎉 Son Durum
+
+✅ **Tüm servisler çalışıyor:**
+- Frontend (3000) ✅
+- API Gateway (8080) ✅
+- Eureka Server (8761) ✅
+- User Service (8081:8080) ✅
+- Product Service (8082:8080) ✅
+- Order Service (8083:8080) ✅
+- Notification Service (8084:8080) ✅
+- MongoDB, RabbitMQ, Redis, Elasticsearch, Kibana ✅
+
+✅ **API çağrıları doğru çalışıyor:**
+- Frontend → API Gateway → Mikroservisler
+- CORS ayarları doğru
+- Port mapping'ler düzeltildi

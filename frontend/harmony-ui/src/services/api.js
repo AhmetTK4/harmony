@@ -1,17 +1,19 @@
-// Environment'a göre API URL'ini belirle
+// API taban URL'ini environment'a göre belirler
 const getApiBaseUrl = () => {
-  // Production'da environment variable kullan
+  // Öncelik: Environment variable
   if (process.env.REACT_APP_API_URL) {
     return process.env.REACT_APP_API_URL;
   }
-  
-  // Development'ta localhost kullan
-  if (process.env.NODE_ENV === 'development') {
+  // Development ortamı (npm start veya local docker)
+  if (process.env.REACT_APP_ENVIRONMENT === 'development' || process.env.NODE_ENV === 'development') {
     return 'http://localhost:8080/api';
   }
-  
-  // Fallback olarak production URL'i kullan
-  return 'https://user-service-71511467925.europe-west1.run.app/api';
+  // Production ortamı (Google Cloud Run)
+  if (process.env.REACT_APP_ENVIRONMENT === 'production') {
+    return 'https://user-service-71511467925.europe-west1.run.app/api';
+  }
+  // Fallback: local
+  return 'http://localhost:8080/api';
 };
 
 const API_BASE_URL = getApiBaseUrl();

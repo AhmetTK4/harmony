@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/products")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "https://harmony-ui-71511467925.europe-west1.run.app"})
 public class ProductController {
     
     @Autowired
