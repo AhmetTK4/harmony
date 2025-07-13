@@ -7,8 +7,8 @@ on:
     branches: [ main ]
 
 env:
-  PROJECT_ID: harmony-microservices
-  REGION: us-central1
+  PROJECT_ID: tactile-cinema-465809-f9
+  REGION: europe-west1
   USER_SERVICE_NAME: user-service
   FRONTEND_SERVICE_NAME: harmony-ui
 
@@ -140,20 +140,20 @@ jobs:
     - name: Build and Push User Service Image
       run: |
         cd backend/user-service
-        docker build -t europe-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/harmony-repo/user-service:${{ github.sha }} .
-        docker push europe-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/harmony-repo/user-service:${{ github.sha }}
+        docker build -t europe-west1-docker.pkg.dev/tactile-cinema-465809-f9/harmony-repo/user-service:${{ github.sha }} .
+        docker push europe-west1-docker.pkg.dev/tactile-cinema-465809-f9/harmony-repo/user-service:${{ github.sha }}
     
     - name: Build and Push Frontend Image
       run: |
         cd frontend/harmony-ui
-        docker build -t europe-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/harmony-repo/harmony-ui:${{ github.sha }} .
-        docker push europe-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/harmony-repo/harmony-ui:${{ github.sha }}
+        docker build -t europe-west1-docker.pkg.dev/tactile-cinema-465809-f9/harmony-repo/harmony-ui:${{ github.sha }} .
+        docker push europe-west1-docker.pkg.dev/tactile-cinema-465809-f9/harmony-repo/harmony-ui:${{ github.sha }}
     
     - name: Deploy to Cloud Run
       run: |
         # Deploy User Service
         gcloud run deploy ${{ env.USER_SERVICE_NAME }} \
-          --image europe-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/harmony-repo/user-service:${{ github.sha }} \
+          --image europe-west1-docker.pkg.dev/tactile-cinema-465809-f9/harmony-repo/user-service:${{ github.sha }} \
           --platform managed \
           --region ${{ env.REGION }} \
           --allow-unauthenticated \
@@ -161,7 +161,7 @@ jobs:
         
         # Deploy Frontend
         gcloud run deploy ${{ env.FRONTEND_SERVICE_NAME }} \
-          --image europe-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/harmony-repo/harmony-ui:${{ github.sha }} \
+          --image europe-west1-docker.pkg.dev/tactile-cinema-465809-f9/harmony-repo/harmony-ui:${{ github.sha }} \
           --platform managed \
           --region ${{ env.REGION }} \
           --allow-unauthenticated \
