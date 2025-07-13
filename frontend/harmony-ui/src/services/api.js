@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://user-service-71511467925.europe-west1.run.app/api';
 
 class ApiService {
   getAuthHeaders() {

@@ -95,6 +95,8 @@ jobs:
         npm ci
     
     - name: Build Frontend
+      env:
+        REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
       run: |
         cd frontend/harmony-ui
         npm run build
