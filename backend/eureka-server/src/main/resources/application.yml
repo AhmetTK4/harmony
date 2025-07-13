@@ -1,41 +1,30 @@
 server:
-  port: 8761
+  port: 8080
 
 spring:
   application:
-    name: eureka-server
-  data:
-    mongodb:
-      uri: ${
-        MONGODB_URI:mongodb://localhost:27017/eureka-server
-      }
+    name: api-gateway
+
   cloud:
     discovery:
       enabled: true
     config:
       enabled: false
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-    register-with-eureka: true
-    fetch-registry: true
-  instance:
-    prefer-ip-address: true
-    instance-id: ${spring.application.name}:8761
-
-management:
-  endpoints:
-    web.exposure.include: "*"
-  endpoint:
-    health:
-      show-details: always
-
-logging:
-  level:
-    com.harmony: DEBUG
-    org.springframework.data.mongodb: DEBUG
-    com.mongodb: DEBUG
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins:
+              - "http://localhost:3000"   # sadece 1 tane!
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowed-headers:
+              - "*"

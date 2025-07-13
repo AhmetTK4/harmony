@@ -6,9 +6,7 @@ spring:
     name: user-service
   data:
     mongodb:
-      uri: ${
-        MONGODB_URI:mongodb://localhost:27017/user
-      }
+      uri: ${MONGODB_URI:mongodb://localhost:27017/user}
   cloud:
     discovery:
       enabled: true

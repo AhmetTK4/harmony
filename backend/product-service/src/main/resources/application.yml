@@ -6,9 +6,7 @@ spring:
     name: product-service
   data:
     mongodb:
-      uri: ${
-        MONGODB_URI:mongodb://localhost:27017/product
-      }
+      uri: ${MONGODB_URI:mongodb://localhost:27017/product}
   cloud:
     discovery:
       enabled: true

@@ -1,41 +1,46 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from './contexts/AuthContext.js';
-import Navbar from './components/Navbar.js';
-import Home from './pages/Home.js';
-import Users from './pages/Users.js';
-import Products from './pages/Products.js';
-import Orders from './pages/Orders.js';
-import Notifications from './pages/Notifications.js';
-import Login from './pages/Login.js';
-import Register from './pages/Register.js';
+import { Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Products from './pages/Products';
+import Orders from './pages/Orders';
+import Notifications from './pages/Notifications';
+import Users from './pages/Users';
+import { useAuth } from './contexts/AuthContext';
 import './App.css';
 
-const queryClient = new QueryClient();
-
 function App() {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router>
-          <div className="min-h-screen bg-gray-50">
-            <Navbar />
-            <main className="container mx-auto px-4 py-8">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/users" element={<Users />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/orders" element={<Orders />} />
-                <Route path="/notifications" element={<Notifications />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-              </Routes>
-            </main>
-          </div>
-        </Router>
-      </AuthProvider>
-    </QueryClientProvider>
+    <div className="App">
+      <Navbar />
+      <main className="min-h-screen bg-gray-50">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          {isAuthenticated && (
+            <>
+              <Route path="/products" element={<Products />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/users" element={<Users />} />
+            </>
+          )}
+        </Routes>
+      </main>
+    </div>
   );
 }
 

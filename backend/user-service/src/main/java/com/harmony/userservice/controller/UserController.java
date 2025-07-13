@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "https://harmony-ui-71511467925.europe-west1.run.app"})
+@CrossOrigin(origins = {"http://localhost:3002", "https://harmony-ui-71511467925.europe-west1.run.app"})
 public class UserController {
     
     @Autowired

@@ -1,52 +1,29 @@
 {
   "name": "harmony-ui",
   "version": "1.0.0",
-  "description": "Harmony Microservices Frontend Application",
+  "description": "Harmony Microservices Frontend",
   "private": true,
-  "homepage": ".",
-  "main": "src/index.js",
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=8.0.0"
-  },
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
-
-    "axios": "^1.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.11.1",
-    "@tanstack/react-query": "^4.29.5",
+    "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
-
-    "web-vitals": "^2.1.4",
-    "tailwindcss": "^3.3.2",
-    "autoprefixer": "^10.4.14",
-    "postcss": "^8.4.24",
-    "@headlessui/react": "^1.7.14",
-    "@heroicons/react": "^2.0.17",
-    "clsx": "^1.2.1"
+    "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "CI=false GENERATE_SOURCEMAP=false react-scripts build",
-    "build:dev": "CI=false GENERATE_SOURCEMAP=false REACT_APP_ENVIRONMENT=development react-scripts build",
-    "build:prod": "CI=false GENERATE_SOURCEMAP=false REACT_APP_ENVIRONMENT=production react-scripts build",
+    "build": "react-scripts build",
     "test": "react-scripts test",
-    "test:ci": "react-scripts test --watchAll=false --coverage",
-    "eject": "react-scripts eject",
-    "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "eslint src --ext .ts,.tsx --fix"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
-      "react-app"
-    ],
-    "rules": {
-      "no-unused-vars": "warn"
-    }
+      "react-app",
+      "react-app/jest"
+    ]
   },
   "browserslist": {
     "production": [
@@ -60,16 +37,7 @@
       "last 1 safari version"
     ]
   },
-  "resolutions": {
-    "@babel/core": "^7.22.0"
-  },
-  "overrides": {
-    "@babel/core": "^7.22.0"
-  },
   "devDependencies": {
-    "eslint": "^8.42.0",
-    "eslint-plugin-react": "^7.32.2",
-    "eslint-plugin-react-hooks": "^4.6.0"
-  },
-  "proxy": "http://localhost:8080"
+    "tailwindcss": "^3.0.24"
+  }
 } 
