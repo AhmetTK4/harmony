@@ -4,37 +4,17 @@ on:
   push:
     branches: [ main, develop ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
 
 env:
-  REGISTRY: gcr.io
-  IMAGE_NAME: harmony
+  PROJECT_ID: harmony-microservices
+  REGION: us-central1
+  USER_SERVICE_NAME: user-service
+  FRONTEND_SERVICE_NAME: harmony-ui
 
 jobs:
-  test:
+  test-backend:
     runs-on: ubuntu-latest
-    
-    services:
-      mongodb:
-        image: mongo:7.0
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "mongosh --eval 'db.runCommand(\"ping\").ok'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      
-      rabbitmq:
-        image: rabbitmq:3.12-management
-        ports:
-          - 5672:5672
-        options: >-
-          --health-cmd "rabbitmq-diagnostics ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
     - uses: actions/checkout@v4
     
@@ -44,13 +24,6 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: frontend/harmony-ui/package-lock.json
     
     - name: Cache Maven packages
       uses: actions/cache@v3
@@ -59,39 +32,19 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
     
-    - name: Build and Test Backend Services
+    - name: Test User Service
       run: |
         cd backend/user-service
         mvn clean test
-        cd ../product-service
-        mvn clean test
-        cd ../order-service
-        mvn clean test
-        cd ../notification-service
-        mvn clean test
-        cd ../api-gateway
-        mvn clean test
     
-    - name: Install Frontend Dependencies
+    - name: Test Product Service
       run: |
-        cd frontend/harmony-ui
-        npm ci
-    
-    - name: Test Frontend
-      run: |
-        cd frontend/harmony-ui
-        npm run test:ci
-    
-    - name: Build Frontend
-      run: |
-        cd frontend/harmony-ui
-        npm run build
+        cd backend/product-service
+        mvn clean test
 
-  build:
-    needs: test
+  build-backend:
+    needs: test-backend
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
-    
     steps:
     - uses: actions/checkout@v4
     
@@ -102,6 +55,33 @@ jobs:
         distribution: 'temurin'
         cache: maven
     
+    - name: Build User Service
+      run: |
+        cd backend/user-service
+        mvn clean package -DskipTests
+    
+    - name: Build Product Service
+      run: |
+        cd backend/product-service
+        mvn clean package -DskipTests
+    
+    - name: Upload User Service Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: user-service-jar
+        path: backend/user-service/target/*.jar
+    
+    - name: Upload Product Service Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: product-service-jar
+        path: backend/product-service/target/*.jar
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
@@ -109,108 +89,87 @@ jobs:
         cache: 'npm'
         cache-dependency-path: frontend/harmony-ui/package-lock.json
     
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+    - name: Install Frontend Dependencies
+      run: |
+        cd frontend/harmony-ui
+        npm ci
     
-    - name: Log in to Google Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: _json_key
-        password: ${{ secrets.GCP_SA_KEY }}
+    - name: Build Frontend
+      run: |
+        cd frontend/harmony-ui
+        npm run build
     
-    - name: Build and Push User Service
-      uses: docker/build-push-action@v5
+    - name: Upload Frontend Build
+      uses: actions/upload-artifact@v3
       with:
-        context: ./backend/user-service
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.IMAGE_NAME }}-user-service:${{ github.sha }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-    
-    - name: Build and Push Product Service
-      uses: docker/build-push-action@v5
-      with:
-        context: ./backend/product-service
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.IMAGE_NAME }}-product-service:${{ github.sha }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-    
-    - name: Build and Push Order Service
-      uses: docker/build-push-action@v5
-      with:
-        context: ./backend/order-service
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.IMAGE_NAME }}-order-service:${{ github.sha }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-    
-    - name: Build and Push Notification Service
-      uses: docker/build-push-action@v5
-      with:
-        context: ./backend/notification-service
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.IMAGE_NAME }}-notification-service:${{ github.sha }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-    
-    - name: Build and Push API Gateway
-      uses: docker/build-push-action@v5
-      with:
-        context: ./backend/api-gateway
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.IMAGE_NAME }}-api-gateway:${{ github.sha }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-    
-    - name: Build and Push Frontend
-      uses: docker/build-push-action@v5
-      with:
-        context: ./frontend/harmony-ui
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.IMAGE_NAME }}-ui:${{ github.sha }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        name: frontend-build
+        path: frontend/harmony-ui/build
 
-  deploy:
-    needs: build
+  deploy-to-google-cloud:
+    needs: [build-backend, build-frontend]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     
     steps:
     - uses: actions/checkout@v4
     
-    - name: Set up Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v2
+    - name: Download Backend Artifacts
+      uses: actions/download-artifact@v3
       with:
-        service_account_key: ${{ secrets.GCP_SA_KEY }}
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        name: user-service-jar
+        path: backend/user-service/target/
     
-    - name: Configure Docker for GCR
+    - name: Download Frontend Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: frontend-build
+        path: frontend/harmony-ui/build/
+    
+    - name: Google Auth
+      id: auth
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+    
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+    
+    - name: Configure Docker
       run: gcloud auth configure-docker
     
-    - name: Get GKE credentials
+    - name: Build and Push User Service Image
       run: |
-        gcloud container clusters get-credentials harmony-cluster \
-          --region ${{ secrets.GCP_REGION }} \
-          --project ${{ secrets.GCP_PROJECT_ID }}
+        cd backend/user-service
+        docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.USER_SERVICE_NAME }}:${{ github.sha }} .
+        docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.USER_SERVICE_NAME }}:${{ github.sha }}
     
-    - name: Deploy to GKE
+    - name: Build and Push Frontend Image
       run: |
-        cd infrastructure/kubernetes
-        kubectl set image deployment/user-service user-service=${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.IMAGE_NAME }}-user-service:${{ github.sha }}
-        kubectl set image deployment/product-service product-service=${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.IMAGE_NAME }}-product-service:${{ github.sha }}
-        kubectl set image deployment/order-service order-service=${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.IMAGE_NAME }}-order-service:${{ github.sha }}
-        kubectl set image deployment/notification-service notification-service=${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.IMAGE_NAME }}-notification-service:${{ github.sha }}
-        kubectl set image deployment/api-gateway api-gateway=${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.IMAGE_NAME }}-api-gateway:${{ github.sha }}
-        kubectl set image deployment/harmony-ui harmony-ui=${{ env.REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.IMAGE_NAME }}-ui:${{ github.sha }}
+        cd frontend/harmony-ui
+        docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.FRONTEND_SERVICE_NAME }}:${{ github.sha }} .
+        docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.FRONTEND_SERVICE_NAME }}:${{ github.sha }}
     
-    - name: Wait for deployment
+    - name: Deploy to Cloud Run
       run: |
-        kubectl rollout status deployment/user-service
-        kubectl rollout status deployment/product-service
-        kubectl rollout status deployment/order-service
-        kubectl rollout status deployment/notification-service
-        kubectl rollout status deployment/api-gateway
-        kubectl rollout status deployment/harmony-ui 
+        # Deploy User Service
+        gcloud run deploy ${{ env.USER_SERVICE_NAME }} \
+          --image gcr.io/${{ env.PROJECT_ID }}/${{ env.USER_SERVICE_NAME }}:${{ github.sha }} \
+          --platform managed \
+          --region ${{ env.REGION }} \
+          --allow-unauthenticated \
+          --set-env-vars="SPRING_PROFILES_ACTIVE=prod,MONGODB_URI=${{ secrets.MONGODB_URI }},JWT_SECRET=${{ secrets.JWT_SECRET }}"
+        
+        # Deploy Frontend
+        gcloud run deploy ${{ env.FRONTEND_SERVICE_NAME }} \
+          --image gcr.io/${{ env.PROJECT_ID }}/${{ env.FRONTEND_SERVICE_NAME }}:${{ github.sha }} \
+          --platform managed \
+          --region ${{ env.REGION }} \
+          --allow-unauthenticated \
+          --set-env-vars="REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}"
+    
+    - name: Update Cloud Run URLs
+      run: |
+        USER_SERVICE_URL=$(gcloud run services describe ${{ env.USER_SERVICE_NAME }} --region=${{ env.REGION }} --format='value(status.url)')
+        FRONTEND_URL=$(gcloud run services describe ${{ env.FRONTEND_SERVICE_NAME }} --region=${{ env.REGION }} --format='value(status.url)')
+        echo "User Service URL: $USER_SERVICE_URL"
+        echo "Frontend URL: $FRONTEND_URL" 
