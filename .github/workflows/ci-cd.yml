@@ -157,6 +157,10 @@ jobs:
           --platform managed \
           --region ${{ env.REGION }} \
           --allow-unauthenticated \
+          --memory 1Gi \
+          --cpu 1 \
+          --timeout 300 \
+          --max-instances 10 \
           --set-env-vars="SPRING_PROFILES_ACTIVE=prod,MONGODB_URI=${{ secrets.MONGODB_URI }},JWT_SECRET=${{ secrets.JWT_SECRET }}"
         
         # Deploy Frontend
@@ -165,6 +169,10 @@ jobs:
           --platform managed \
           --region ${{ env.REGION }} \
           --allow-unauthenticated \
+          --memory 512Mi \
+          --cpu 1 \
+          --timeout 300 \
+          --max-instances 10 \
           --set-env-vars="REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}"
     
     - name: Update Cloud Run URLs

@@ -3,15 +3,13 @@ spring:
     mongodb:
       uri: ${MONGODB_URI:mongodb://localhost:27017/harmony_users}
       auto-index-creation: false
-      ssl: true
-      ssl-invalid-host-name-allowed: true
-      connect-timeout: 120000
-      socket-timeout: 120000
-      server-selection-timeout: 120000
-      max-wait-time: 120000
-      max-connection-pool-size: 10
+      connect-timeout: 180000
+      socket-timeout: 180000
+      server-selection-timeout: 180000
+      max-wait-time: 180000
+      max-connection-pool-size: 5
       min-connection-pool-size: 1
-      max-connection-idle-time: 30000
+      max-connection-idle-time: 60000
   security:
     jwt:
       secret: ${JWT_SECRET:your-secret-key}
@@ -37,9 +35,8 @@ logging:
   level:
     com.harmony: INFO
     org.springframework.security: INFO
-    org.springframework.data.mongodb: DEBUG
-    org.springframework.boot: DEBUG
-    com.mongodb: DEBUG
+    org.springframework.data.mongodb: INFO
+    org.springframework.boot: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 
